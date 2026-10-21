@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="page-title">تحميل اللعبة حصرياً</title>
+    
+    <meta name="theme-color" content="#00f2fe">
+    <link id="dynamic-manifest" rel="manifest" href="">
+
+    <script>
+        // 🚀 إعادة التوجيه الفورية والذكية عند فتح التطبيق المثبت من الشاشة الرئيسية
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+        
+        if (isStandalone) {
+            const urlParams = new URLSearchParams(window.location.search);
+            const targetPage = urlParams.get('target') || '2.html';
+            
+            // تحويل الزائر فوراً إلى صفحة الهدف (مثل 2.html أو 5.html) مع تمرير نفس المعلمات الحالية
+            window.location.replace(targetPage + window.location.search);
+        }
+    </script>
+
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --accent-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --text-color: #f8fafc;
+            --text-secondary: #94a3b8;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, sans-serif; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            justify-content: center;
+        }
+
+        .container { width: 100%; max-width: 450px; text-align: center; }
+
+        .badge {
+            background: var(--accent-gradient);
+            color: #000;
+            font-weight: bold;
+            font-size: 0.8rem;
+            padding: 6px 14px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+
+        h1 { font-size: 1.6rem; margin-bottom: 20px; color: #fff; }
+
+        .video-container {
+            position: relative;
+            width: 100%;
+            border-radius: 16px;
+            overflow: hidden;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+            background-color: #000;
+        }
+
+        .video-container video { width: 100%; display: block; border-radius: 16px; }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 14px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            text-decoration: none;
+        }
+
+        .btn-download {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: #fff;
+            box-shadow: 0 4px 20px rgba(56, 239, 125, 0.4);
+            animation: pulse 1.5s infinite;
+        }
+
+        .btn-play {
+            background: linear-gradient(135deg, #2196F3 0%, #00bcd4 100%);
+            color: #fff;
+            box-shadow: 0 4px 20px rgba(33, 150, 243, 0.4);
+            animation: none;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+
+        .instructions { font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <span class="badge">🔥 حصرياً لأجهزة الموبايل</span>
+        <h1 id="game-title">تحميل اللعبة</h1>
+
+        <div class="video-container">
+            <video id="game-video" controls loop playsinline poster="https://via.placeholder.com/480x270/1e293b/00f2fe?text=Game+Preview">
+                <source id="video-source" src="https://meja.do.am/tik/game1.mp4" type="video/mp4">
+            </video>
+        </div>
+
+        <button class="btn btn-download" id="action-btn">
+            🚀 تثبيت اللعبة الآن!
+        </button>
+
+        <p class="instructions" id="instruction-text">
+            ⚠️ <b>طريقة التثبيت :</b> اضغط على زر التثبيت أعلاه لإضافة اللعبة إلى شاشتك الرئيسية.
+        </p>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        
+        const gameName = urlParams.get('name') || 'لعبة أسطي الميكروباص';
+        const gameImg = urlParams.get('img') || 'https://via.placeholder.com/480x270/1e293b/00f2fe?text=Game+Preview';
+        const gameVideo = urlParams.get('video') || 'https://meja.do.am/tik/game1.mp4';
+        const redirectUrl = urlParams.get('redirect') || 'https://www.google.com';
+
+        document.getElementById('page-title').textContent = gameName;
+        document.getElementById('game-title').textContent = gameName;
+        
+        const videoElem = document.getElementById('game-video');
+        videoElem.poster = gameImg;
+        document.getElementById('video-source').src = gameVideo;
+
+        // إعداد Manifest ديناميكي يحفظ رابط الهبوط ومعلماته كاملة عند التثبيت
+        const manifestData = {
+            "name": gameName,
+            "short_name": gameName,
+            "start_url": window.location.href, 
+            "display": "standalone",
+            "background_color": "#0f172a",
+            "theme_color": "#00f2fe",
+            "icons": [
+                {
+                    "src": gameImg,
+                    "sizes": "192x192",
+                    "type": "image/png"
+                }
+            ]
+        };
+
+        const manifestBlob = new Blob([JSON.stringify(manifestData)], { type: 'application/json' });
+        document.getElementById('dynamic-manifest').setAttribute('href', URL.createObjectURL(manifestBlob));
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').catch(() => {});
+        }
+
+        let deferredPrompt;
+        const actionBtn = document.getElementById('action-btn');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+        });
+
+        actionBtn.addEventListener('click', async () => {
+            // إذا كان الزر في وضع "تشغيل اللعبة"، يتم التوجيه إلى جوجل مباشرة
+            if (actionBtn.classList.contains('btn-play')) {
+                window.location.href = redirectUrl;
+                return;
+            }
+
+            // إجراء طلب التثبيت من المتصفح
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    setButtonToPlay();
+                }
+                deferredPrompt = null;
+            } else {
+                // إذا لم يتوفر برومبت التثبيت الفوري، يتحول الزر للتشغيل مؤقتاً لهذه الجلسة ويحول الرابط
+                setButtonToPlay();
+                window.location.href = redirectUrl;
+            }
+        });
+
+        window.addEventListener('appinstalled', () => {
+            setButtonToPlay();
+        });
+
+        function setButtonToPlay() {
+            actionBtn.textContent = '🎮 تشغيل اللعبة';
+            actionBtn.classList.remove('btn-download');
+            actionBtn.classList.add('btn-play');
+            document.getElementById('instruction-text').innerHTML = '✅ <b>التطبيق مثبت بنجاح!</b> يمكنك فتحه الآن من الشاشة الرئيسية.';
+        }
+    </script>
+</body>
+</html>
