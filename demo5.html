@@ -28,20 +28,24 @@
         async function subscribeUser() {
             const statusText = document.getElementById('status-text');
             try {
+                // 1. طلب إذن الإشعارات من المستخدم أولاً
                 const permission = await Notification.requestPermission();
                 
                 if (permission === 'granted') {
-                    statusText.innerText = "جاري تسجيل الخدمة...";
+                    statusText.innerText = "جاري تسجيل وتنشيط Service Worker...";
 
-                    // 1. تسجيل ملف الـ Service Worker من مجلد /vid/ يدوياً أولاً
+                    // 2. تسجيل Service Worker والانتظار حتى يصبح نشطاً ومتاحاً بالكامل
                     const registration = await navigator.serviceWorker.register('/vid/firebase-messaging-sw.js', {
                         scope: '/vid/'
                     });
-                    console.log('✅ تم تسجيل Service Worker بنجاح:', registration.scope);
+                    
+                    // الانتظار لحين اكتمال التنشيط لمنع خطأ no active Service Worker
+                    await navigator.serviceWorker.ready;
+                    console.log('✅ تم تنشيط Service Worker بنجاح:', registration.scope);
 
                     statusText.innerText = "جاري جلب الـ Token...";
 
-                    // 2. تمرير الـ registration صراحةً لكي لا تبحث فايربيس في الجذر
+                    // 3. جلب الـ Token مع تمرير الـ registration النشطة
                     const currentToken = await getToken(messaging, { 
                         vapidKey: 'BJb3XGZdu2yqSuRrcNiRKqnzKK76OMmk450nrG0WmA4gCLfunnK6ZhZxmmUzzonlSNKb0FxWPDGV47_LVr04idE',
                         serviceWorkerRegistration: registration 
@@ -50,7 +54,8 @@
                     if (currentToken) {
                         statusText.innerText = "جاري الحفظ في السيرفر...";
 
-                        await fetch('https://script.google.com/macros/s/AKfycbx30YOMcecYdHz24AVlrqEwkI82wuPOKVFokYRT0LHGG0v6JYvWxqO-n_DOKjWbh9opZA/exec', {
+                        // 4. إرسال الـ Token إلى جوجل سكربت للحفظ
+                        await fetch('https://script.google.com/macros/s/AKfycbwXkCltWL3c9uQnp649x_DrSGJAruDHbF91P15UpbZQfh7RfWHa8_TVmQhqioGVIk6PXQ/exec', {
                             method: 'POST',
                             mode: 'no-cors',
                             headers: { 'Content-Type': 'application/json' },
@@ -58,6 +63,7 @@
                         });
                         
                         statusText.innerText = "🎉 تم تفعيل الإشعارات وحفظ اشتراكك بنجاح!";
+                        console.log('Token:', currentToken);
                     } else {
                         statusText.innerText = "⚠️ لم يتم العثور على Token للإشعارات.";
                     }
