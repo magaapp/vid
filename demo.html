@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2إعداد الإشعارات</title>
+    <title>إعداد الإشعارات3</title>
 </head>
 <body style="font-family: sans-serif; text-align: center; margin-top: 100px;">
 
@@ -25,8 +25,9 @@
         const app = initializeApp(firebaseConfig);
         const messaging = getMessaging(app);
 
+        // تسجيل Service Worker من مسار مجلد /vid/ مع تحديد النطاق (scope) الصحيح
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('https://magaapp.github.io/vid/firebase-messaging-sw.js')
+            navigator.serviceWorker.register('/vid/firebase-messaging-sw.js', { scope: '/vid/' })
                 .then((registration) => {
                     console.log('✅ تم تسجيل Service Worker بنجاح:', registration.scope);
                 })
@@ -43,7 +44,6 @@
                 if (permission === 'granted') {
                     statusText.innerText = "جاري جلب الـ Token...";
 
-                    // محاولة جلب الـ Token
                     const currentToken = await getToken(messaging, { 
                         vapidKey: 'BJb3XGZdu2yqSuRrcNiRKqnzKK76OMmk450nrG0WmA4gCLfunnK6ZhZxmmUzzonlSNKb0FxWPDGV47_LVr04idE' 
                     });
@@ -66,7 +66,6 @@
                     statusText.innerText = "❌ تم رفض إذن الإشعارات من المتصفح.";
                 }
             } catch (err) {
-                // 👇 هنا سنعرض الخطأ الحقيقي بالتفصيل على الشاشة وفي الـ Console
                 statusText.innerText = "❌ خطأ تفصيلي: " + err.message;
                 console.error("تفاصيل الخطأ الكاملة:", err);
             }
