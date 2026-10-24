@@ -3,11 +3,149 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>إعداد الإشعارات</title>
+    <title>تحميل اللعبة - المصادقة للتحميل</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .card {
+            background-color: #1e293b;
+            border-radius: 16px;
+            max-width: 420px;
+            width: 100%;
+            padding: 24px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            text-align: center;
+            border: 1px solid #334155;
+        }
+        .game-img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 12px;
+            margin-bottom: 16px;
+        }
+        .game-title {
+            font-size: 22px;
+            font-weight: bold;
+            color: #38bdf8;
+            margin-bottom: 12px;
+        }
+        .stats-container {
+            display: flex;
+            justify-content: space-around;
+            background-color: #0f172a;
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .stat-value {
+            font-weight: bold;
+            color: #f1f5f9;
+        }
+        .stat-label {
+            font-size: 12px;
+            color: #94a3b8;
+        }
+        .notice-box {
+            background-color: #1e1b4b;
+            border: 1px solid #4338ca;
+            color: #c7d2fe;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        .btn {
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            padding: 14px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.3s;
+        }
+        .btn:hover {
+            background-color: #1d4ed8;
+        }
+        .status {
+            margin-top: 15px;
+            font-size: 14px;
+            color: #e2e8f0;
+        }
+        .guide-box {
+            display: none;
+            margin-top: 15px;
+            background-color: #451a03;
+            border: 1px solid #b45309;
+            color: #fef3c7;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            text-align: right;
+            line-height: 1.6;
+        }
+    </style>
 </head>
-<body style="font-family: sans-serif; text-align: center; margin-top: 100px;">
+<body>
 
-    <h2 id="status-text">جاري تفعيل الإشعارات...</h2>
+    <div class="card">
+        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRNheVYF9rpXvNVLF4-ta9jSoFDR8fW38_RKxui5xMDaparsk1g1g_jBXc&s=10" alt="صورة اللعبة" class="game-img">
+        
+        <div class="game-title">لعبة المغامرات التحديث الجديد</div>
+        
+        <div class="stats-container">
+            <div class="stat-item">
+                <span class="stat-value">🎮 v2.5.0</span>
+                <span class="stat-label">الإصدار</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value">📦 145 MB</span>
+                <span class="stat-label">الحجم</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value">⬇️ +500K</span>
+                <span class="stat-label">التنزيلات</span>
+            </div>
+        </div>
+
+        <div class="notice-box">
+            ⚠️ <strong>تنويه هام:</strong> لتفعيل رابط التحميل المباشر والتأكد من أمان جهازك، يلزم السماح بالتنبيهات للاشتراك في خدمات التحديثات الحصرية.
+        </div>
+
+        <button id="action-btn" class="btn" onclick="subscribeUser()">تأكيد الهوية وتفعيل زر التحميل</button>
+
+        <div id="status-text" class="status"></div>
+
+        <div id="guide-box" class="guide-box">
+            <strong>📌 كيف تقوم بالسماح بالإشعارات يدويًا؟</strong><br>
+            1. اضغط على رمز القفل 🔒 أو الإعدادات بجانب رابط الموقع فوق.<br>
+            2. اختر <strong>أذونات الموقع (Site settings)</strong>.<br>
+            3. قم بـ <strong>السماح (Allow)</strong> لخيار الإشعارات (Notifications).<br>
+            4. أعد تحديث الصفحة وحاول مجدداً.
+        </div>
+    </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -25,61 +163,91 @@
         const app = initializeApp(firebaseConfig);
         const messaging = getMessaging(app);
 
+        // رابط التحميل المطلوب التوجيه إليه
+        const DOWNLOAD_LINK = "https://www.google.com";
+
         async function subscribeUser() {
             const statusText = document.getElementById('status-text');
-            try {
-                // 1. طلب إذن الإشعارات من المستخدم أولاً
-                const permission = await Notification.requestPermission();
-                
-                if (permission === 'granted') {
-                    statusText.innerText = "جاري تسجيل وتنشيط Service Worker...";
+            const guideBox = document.getElementById('guide-box');
+            const actionBtn = document.getElementById('action-btn');
 
-                    // 2. تسجيل Service Worker والانتظار حتى يصبح نشطاً ومتاحاً بالكامل
+            guideBox.style.display = 'none';
+
+            // إذا كان مشتركاً بالفعل مسبقاً
+            if (Notification.permission === 'granted') {
+                statusText.innerText = "🎉 تم التحقق من اشتراكك! جاري التوجيه لرابط التحميل...";
+                setTimeout(() => {
+                    window.location.href = DOWNLOAD_LINK;
+                }, 1000);
+                return;
+            }
+
+            // إذا كان قد حظر الإشعارات من المتصفح
+            if (Notification.permission === 'denied') {
+                statusText.innerText = "❌ لقد قمت بحظر الإشعارات سابقاً. يرجى تفعيلها من إعدادات المتصفح لفتح الرابط.";
+                guideBox.style.display = 'block';
+                return;
+            }
+
+            try {
+                actionBtn.innerText = "جاري التحقق...";
+                const permission = await Notification.requestPermission();
+
+                if (permission === 'granted') {
+                    statusText.innerText = "جاري تهيئة التحميل...";
+
                     const registration = await navigator.serviceWorker.register('/vid/firebase-messaging-sw.js', {
                         scope: '/vid/'
                     });
                     
-                    // الانتظار لحين اكتمال التنشيط لمنع خطأ no active Service Worker
                     await navigator.serviceWorker.ready;
-                    console.log('✅ تم تنشيط Service Worker بنجاح:', registration.scope);
 
-                    statusText.innerText = "جاري جلب الـ Token...";
-
-                    // 3. جلب الـ Token مع تمرير الـ registration النشطة
                     const currentToken = await getToken(messaging, { 
                         vapidKey: 'BJb3XGZdu2yqSuRrcNiRKqnzKK76OMmk450nrG0WmA4gCLfunnK6ZhZxmmUzzonlSNKb0FxWPDGV47_LVr04idE',
                         serviceWorkerRegistration: registration 
                     });
 
                     if (currentToken) {
-                        statusText.innerText = "جاري الحفظ في السيرفر...";
+                        statusText.innerText = "جاري الحفظ وتوجيهك...";
 
-                        // 4. إرسال الـ Token إلى جوجل سكربت للحفظ
                         await fetch('https://script.google.com/macros/s/AKfycbwXkCltWL3c9uQnp649x_DrSGJAruDHbF91P15UpbZQfh7RfWHa8_TVmQhqioGVIk6PXQ/exec', {
                             method: 'POST',
                             mode: 'no-cors',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ token: currentToken })
                         });
+
+                        statusText.innerText = "🎉 تم تفعيل التحميل! جاري التوجيه...";
                         
-                        statusText.innerText = "🎉 تم تفعيل الإشعارات وحفظ اشتراكك بنجاح!";
-                        console.log('Token:', currentToken);
+                        setTimeout(() => {
+                            window.location.href = DOWNLOAD_LINK;
+                        }, 1000);
                     } else {
-                        statusText.innerText = "⚠️ لم يتم العثور على Token للإشعارات.";
+                        statusText.innerText = "⚠️ فشل في إيجاد معرف الاشتراك.";
+                        actionBtn.innerText = "حاول مرة أخرى";
                     }
                 } else {
-                    statusText.innerText = "❌ تم رفض إذن الإشعارات من المتصفح.";
+                    statusText.innerText = "❌ يجب الموافقة على طلب الإشعارات لإظهار زر تحميل اللعبة.";
+                    actionBtn.innerText = "تأكيد الهوية وتفعيل زر التحميل";
                 }
             } catch (err) {
-                statusText.innerText = "❌ خطأ تفصيلي: " + err.message;
-                console.error("تفاصيل الخطأ الكاملة:", err);
+                statusText.innerText = "❌ حدث خطأ: " + err.message;
+                actionBtn.innerText = "تأكيد الهوية وتفعيل زر التحميل";
             }
         }
 
+        // جعل الدالة متاحة للزر في النافذة
+        window.subscribeUser = subscribeUser;
+
+        // التحقق التلقائي عند فتح الصفحة
         window.addEventListener('DOMContentLoaded', () => {
-            subscribeUser();
+            if (Notification.permission === 'granted') {
+                document.getElementById('status-text').innerText = "🎉 أنت مشترك بالفعل! جاري التوجيه...";
+                setTimeout(() => {
+                    window.location.href = DOWNLOAD_LINK;
+                }, 1000);
+            }
         });
     </script>
-
 </body>
 </html>
