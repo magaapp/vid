@@ -18,21 +18,21 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            padding: 20px;
+            padding: 10px;
         }
         .card {
             background-color: #1e293b;
             border-radius: 16px;
             max-width: 420px;
             width: 100%;
-            padding: 24px;
+            padding: 10px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.5);
             text-align: center;
             border: 1px solid #334155;
         }
         .game-img {
             width: 100%;
-            height: 200px;
+           
             object-fit: cover;
             border-radius: 12px;
             margin-bottom: 16px;
@@ -122,15 +122,15 @@
     <div class="card">
         <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRNheVYF9rpXvNVLF4-ta9jSoFDR8fW38_RKxui5xMDaparsk1g1g_jBXc&s=10" alt="صورة اللعبة" class="game-img">
         
-        <div class="game-title">لعبة المغامرات التحديث الجديد</div>
+        <div class="game-title">لعبة أسطي الميكروباص</div>
         
         <div class="stats-container">
             <div class="stat-item">
-                <span class="stat-value">🎮 v2.5.0</span>
+                <span class="stat-value">🎮 v2.0</span>
                 <span class="stat-label">الإصدار</span>
             </div>
             <div class="stat-item">
-                <span class="stat-value">📦 145 MB</span>
+                <span class="stat-value">📦 97 MB</span>
                 <span class="stat-label">الحجم</span>
             </div>
             <div class="stat-item">
@@ -140,14 +140,14 @@
         </div>
 
         <div class="notice-box">
-            ⚠️ <strong>تنويه هام:</strong> لتفعيل زر التحميل المباشر والتأكد من أمان جهازك، يلزم السماح بالتنبيهات للاشتراك في خدمات التحديثات الحصرية.
+            📌 <strong>تنويه:</strong> لتفعيل زر التحميل المباشر والتأكد من أمان جهازك، يلزم السماح بالتنبيهات للاشتراك في خدمات التحديثات
         </div>
 
         <!-- زر طلب الإشعارات وتأكيد الهوية -->
-        <button id="action-btn" class="btn" onclick="subscribeUser()">تأكيد الهوية وتفعيل زر التحميل</button>
+        <button id="action-btn" class="btn" onclick="subscribeUser()">إضغط للسماح وتحميل اللعبة</button>
 
         <!-- زر التحميل الفعلي (يظهر فقط بعد تفعيل الإشعارات) -->
-        <a id="download-link-btn" href="https://www.google.com" target="_blank" style="text-decoration: none;">
+        <a id="download-link-btn" href="https://appdowntele.blogspot.com/p/game1.html" target="_blank" style="text-decoration: none;">
             <button class="btn download-btn">📥 تحميل اللعبة الآن (مباشر)</button>
         </a>
 
@@ -200,7 +200,7 @@
 
             // إذا كان قد حظر الإشعارات من المتصفح
             if (Notification.permission === 'denied') {
-                statusText.innerText = "❌ لقد قمت بحظر الإشعارات سابقاً. يرجى تفعيلها من إعدادات المتصفح ليظهر لك زر التحميل.";
+                statusText.innerText = "❌ يرجى السماح من إعدادات المتصفح ليظهر لك زر التحميل.";
                 guideBox.style.display = 'block';
                 return;
             }
