@@ -19,10 +19,10 @@ messaging.onBackgroundMessage((payload) => {
     const title = payload.data.title || "تحديث جديد";
     const options = {
         body: payload.data.body || "",
-        icon: payload.data.icon || "https://i.imgur.com/71Qo0vx.png",
+        icon: payload.data.icon || "",
         image: payload.data.image || "",
         data: {
-            url: payload.data.url || "https://appdowntele.blogspot.com/p/stores2.html"
+            url: payload.data.url || ""
         }
     };
 
