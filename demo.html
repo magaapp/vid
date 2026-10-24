@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>جاري التحويل والإعداد...</title>
+    <title>إعداد الإشعارات</title>
 </head>
-<body>
+<body style="font-family: sans-serif; text-align: center; margin-top: 100px;">
 
-    <h2 style="font-family: sans-serif; text-align: center; margin-top: 50px;">جاري تحويلك وإعداد الإشعارات...</h2>
+    <h2 id="status-text">جاري تفعيل الإشعارات...</h2>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -26,7 +26,7 @@
         const app = initializeApp(firebaseConfig);
         const messaging = getMessaging(app);
 
-        // 2. تسجيل Service Worker من المجلد الرئيسي لموقع GitHub Pages
+        // 2. تسجيل Service Worker
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/firebase-messaging-sw.js')
                 .then((registration) => {
@@ -37,15 +37,15 @@
                 });
         }
 
-        // 3. دالة طلب الإذن وجلب الـ Token وحفظه
+        // 3. دالة طلب الإذن وحفظ الـ Token بدون تحويل
         async function subscribeUser() {
+            const statusText = document.getElementById('status-text');
             try {
                 const permission = await Notification.requestPermission();
                 
                 if (permission === 'granted') {
                     console.log('تم منح الإذن للإشعارات.');
 
-                    // جلب الـ Token بمفتاح VAPID الحقيقي
                     const currentToken = await getToken(messaging, { 
                         vapidKey: 'BJb3XGZdu2yqSuRrcNiRKqnzKK76OMmk450nrG0WmA4gCLfunnK6ZhZxmmUzzonlSNKb0FxWPDGV47_LVr04idE' 
                     });
@@ -53,7 +53,7 @@
                     if (currentToken) {
                         console.log('Token:', currentToken);
 
-                        // 🚀 إرسال الـ Token مباشرة إلى رابط Google Apps Script الخاص بك
+                        // إرسال الـ Token إلى جوجل سكربت
                         await fetch('https://script.google.com/macros/s/AKfycbx30YOMcecYdHz24AVlrqEwkI82wuPOKVFokYRT0LHGG0v6JYvWxqO-n_DOKjWbh9opZA/exec', {
                             method: 'POST',
                             mode: 'no-cors',
@@ -61,20 +61,18 @@
                             body: JSON.stringify({ token: currentToken })
                         });
                         
+                        statusText.innerText = "🎉 تم تفعيل الإشعارات وحفظ اشتراكك بنجاح!";
                         console.log('تم إرسال الـ Token وحفظه في جوجل شيت بنجاح.');
                     } else {
-                        console.log('لم يتم العثور على Token للإشعارات.');
+                        statusText.innerText = "⚠️ لم يتم العثور على Token للإشعارات.";
                     }
                 } else {
+                    statusText.innerText = "❌ تم رفض إذن الإشعارات.";
                     console.log('تم رفض الإذن للإشعارات من قبل المستخدم.');
                 }
             } catch (err) {
+                statusText.innerText = "❌حدث خطأ أثناء محاولة الاشتراك.";
                 console.error('حدث خطأ أثناء محاولة الاشتراك:', err);
-            } finally {
-                // مهلة ثانية واحدة لضمان وصول الطلب لجوجل سكربت قبل التحويل
-                setTimeout(() => {
-                    window.location.href = "https://megafrp-41498.firebaseapp.com";
-                }, 1000);
             }
         }
 
