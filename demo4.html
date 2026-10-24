@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>إعداد الإشعارات3</title>
+    <title>إعداد الإشعارات</title>
 </head>
 <body style="font-family: sans-serif; text-align: center; margin-top: 100px;">
 
@@ -25,27 +25,26 @@
         const app = initializeApp(firebaseConfig);
         const messaging = getMessaging(app);
 
-        // تسجيل Service Worker من مسار مجلد /vid/ مع تحديد النطاق (scope) الصحيح
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/vid/firebase-messaging-sw.js', { scope: '/vid/' })
-                .then((registration) => {
-                    console.log('✅ تم تسجيل Service Worker بنجاح:', registration.scope);
-                })
-                .catch((err) => {
-                    console.error('❌ فشل تسجيل Service Worker:', err);
-                });
-        }
-
         async function subscribeUser() {
             const statusText = document.getElementById('status-text');
             try {
                 const permission = await Notification.requestPermission();
                 
                 if (permission === 'granted') {
+                    statusText.innerText = "جاري تسجيل الخدمة...";
+
+                    // 1. تسجيل ملف الـ Service Worker من مجلد /vid/ يدوياً أولاً
+                    const registration = await navigator.serviceWorker.register('/vid/firebase-messaging-sw.js', {
+                        scope: '/vid/'
+                    });
+                    console.log('✅ تم تسجيل Service Worker بنجاح:', registration.scope);
+
                     statusText.innerText = "جاري جلب الـ Token...";
 
+                    // 2. تمرير الـ registration صراحةً لكي لا تبحث فايربيس في الجذر
                     const currentToken = await getToken(messaging, { 
-                        vapidKey: 'BJb3XGZdu2yqSuRrcNiRKqnzKK76OMmk450nrG0WmA4gCLfunnK6ZhZxmmUzzonlSNKb0FxWPDGV47_LVr04idE' 
+                        vapidKey: 'BJb3XGZdu2yqSuRrcNiRKqnzKK76OMmk450nrG0WmA4gCLfunnK6ZhZxmmUzzonlSNKb0FxWPDGV47_LVr04idE',
+                        serviceWorkerRegistration: registration 
                     });
 
                     if (currentToken) {
