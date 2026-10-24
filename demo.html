@@ -14,8 +14,7 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #0f172a;
             color: #f8fafc;
-            display: flex;
-            justify-content: center;
+        
             align-items: center;
             min-height: 100vh;
             padding: 10px;
@@ -32,7 +31,6 @@
         }
         .game-img {
             width: 100%;
-           
             object-fit: cover;
             border-radius: 12px;
             margin-bottom: 16px;
@@ -90,10 +88,15 @@
         .btn:hover {
             background-color: #1d4ed8;
         }
-        /* تصميم زر التحميل النهائي (مخفي لحين الاشتراك) */
+        /* تصميم رابط الرابط والحاوية بالكامل */
+        #download-link-btn {
+            display: none;
+            width: 100%;
+        }
         .download-btn {
             background-color: #16a34a;
-            display: none;
+            display: block;
+            width: 100%;
         }
         .download-btn:hover {
             background-color: #15803d;
@@ -158,7 +161,7 @@
             1. اضغط على رمز القفل 🔒 أو الإعدادات بجانب رابط الموقع فوق.<br>
             2. اختر <strong>أذونات الموقع (Site settings)</strong>.<br>
             3. قم بـ <strong>السماح (Allow)</strong> لخيار الإشعارات (Notifications).<br>
-            4. أعد تحديث الصفحة وحاول مجدداً.
+            4. أعد تحديث الصفحة 🔄 وحاول مجدداً.
         </div>
     </div>
 
@@ -180,9 +183,13 @@
 
         // إظهار زر التحميل وإخفاء زر الاشتراك
         function showDownloadButton() {
-            document.getElementById('action-btn').style.display = 'none';
-            document.getElementById('download-link-btn').style.display = 'block';
-            document.getElementById('status-text').innerText = "🎉 تم تفعيل الإشعارات بنجاح! زر التحميل جاهز الآن.";
+            const actionBtn = document.getElementById('action-btn');
+            const downloadLinkBtn = document.getElementById('download-link-btn');
+            const statusText = document.getElementById('status-text');
+
+            if (actionBtn) actionBtn.style.display = 'none';
+            if (downloadLinkBtn) downloadLinkBtn.style.setProperty('display', 'block', 'important');
+            if (statusText) statusText.innerText = "🎉 تم تفعيل الإشعارات بنجاح! زر التحميل جاهز الآن.";
         }
 
         async function subscribeUser() {
@@ -241,11 +248,11 @@
                     }
                 } else {
                     statusText.innerText = "❌ يجب الموافقة على طلب الإشعارات لإظهار زر تحميل اللعبة.";
-                    actionBtn.innerText = "تأكيد الهوية وتفعيل زر التحميل";
+                    actionBtn.innerText = "إضغط للسماح وتحميل اللعبة";
                 }
             } catch (err) {
                 statusText.innerText = "❌ حدث خطأ: " + err.message;
-                actionBtn.innerText = "تأكيد الهوية وتفعيل زر التحميل";
+                actionBtn.innerText = "إضغط للسماح وتحميل اللعبة";
             }
         }
 
