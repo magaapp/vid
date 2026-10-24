@@ -14,7 +14,7 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #0f172a;
             color: #f8fafc;
-        
+       
             align-items: center;
             min-height: 100vh;
             padding: 10px;
@@ -161,7 +161,7 @@
             1. اضغط على رمز القفل 🔒 أو الإعدادات بجانب رابط الموقع فوق.<br>
             2. اختر <strong>أذونات الموقع (Site settings)</strong>.<br>
             3. قم بـ <strong>السماح (Allow)</strong> لخيار الإشعارات (Notifications).<br>
-            4. أعد تحديث الصفحة 🔄 وحاول مجدداً.
+            4. حاول مجدداً.
         </div>
     </div>
 
@@ -192,6 +192,40 @@
             if (statusText) statusText.innerText = "🎉 تم تفعيل الإشعارات بنجاح! زر التحميل جاهز الآن.";
         }
 
+        async function registerAndSaveToken() {
+            const statusText = document.getElementById('status-text');
+            try {
+                statusText.innerText = "جاري تسجيل الخدمة...";
+                const registration = await navigator.serviceWorker.register('/vid/firebase-messaging-sw.js', {
+                    scope: '/vid/'
+                });
+                
+                await navigator.serviceWorker.ready;
+
+                const currentToken = await getToken(messaging, { 
+                    vapidKey: 'BJb3XGZdu2yqSuRrcNiRKqnzKK76OMmk450nrG0WmA4gCLfunnK6ZhZxmmUzzonlSNKb0FxWPDGV47_LVr04idE',
+                    serviceWorkerRegistration: registration 
+                });
+
+                if (currentToken) {
+                    statusText.innerText = "جاري الحفظ في السيرفر...";
+
+                    await fetch('https://script.google.com/macros/s/AKfycbwXkCltWL3c9uQnp649x_DrSGJAruDHbF91P15UpbZQfh7RfWHa8_TVmQhqioGVIk6PXQ/exec', {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ token: currentToken })
+                    });
+
+                    showDownloadButton();
+                } else {
+                    statusText.innerText = "⚠️ فشل في إيجاد معرف الاشتراك.";
+                }
+            } catch (err) {
+                statusText.innerText = "❌ حدث خطأ: " + err.message;
+            }
+        }
+
         async function subscribeUser() {
             const statusText = document.getElementById('status-text');
             const guideBox = document.getElementById('guide-box');
@@ -199,13 +233,11 @@
 
             guideBox.style.display = 'none';
 
-            // إذا كان مشتركاً بالفعل مسبقاً
             if (Notification.permission === 'granted') {
-                showDownloadButton();
+                await registerAndSaveToken();
                 return;
             }
 
-            // إذا كان قد حظر الإشعارات من المتصفح
             if (Notification.permission === 'denied') {
                 statusText.innerText = "❌ يرجى السماح من إعدادات المتصفح ليظهر لك زر التحميل.";
                 guideBox.style.display = 'block';
@@ -217,35 +249,7 @@
                 const permission = await Notification.requestPermission();
 
                 if (permission === 'granted') {
-                    statusText.innerText = "جاري تسجيل الخدمة...";
-
-                    const registration = await navigator.serviceWorker.register('/vid/firebase-messaging-sw.js', {
-                        scope: '/vid/'
-                    });
-                    
-                    await navigator.serviceWorker.ready;
-
-                    const currentToken = await getToken(messaging, { 
-                        vapidKey: 'BJb3XGZdu2yqSuRrcNiRKqnzKK76OMmk450nrG0WmA4gCLfunnK6ZhZxmmUzzonlSNKb0FxWPDGV47_LVr04idE',
-                        serviceWorkerRegistration: registration 
-                    });
-
-                    if (currentToken) {
-                        statusText.innerText = "جاري الحفظ في السيرفر...";
-
-                        await fetch('https://script.google.com/macros/s/AKfycbwXkCltWL3c9uQnp649x_DrSGJAruDHbF91P15UpbZQfh7RfWHa8_TVmQhqioGVIk6PXQ/exec', {
-                            method: 'POST',
-                            mode: 'no-cors',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ token: currentToken })
-                        });
-
-                        // إظهار زر التحميل فور نجاح العملية
-                        showDownloadButton();
-                    } else {
-                        statusText.innerText = "⚠️ فشل في إيجاد معرف الاشتراك.";
-                        actionBtn.innerText = "حاول مرة أخرى";
-                    }
+                    await registerAndSaveToken();
                 } else {
                     statusText.innerText = "❌ يجب الموافقة على طلب الإشعارات لإظهار زر تحميل اللعبة.";
                     actionBtn.innerText = "إضغط للسماح وتحميل اللعبة";
@@ -256,13 +260,11 @@
             }
         }
 
-        // جعل الدالة متاحة للزر في النافذة
         window.subscribeUser = subscribeUser;
 
-        // التحقق التلقائي عند فتح الصفحة (لو كان مشترك مسبقاً يظهر له الزر مباشرة)
-        window.addEventListener('DOMContentLoaded', () => {
+        window.addEventListener('DOMContentLoaded', async () => {
             if (Notification.permission === 'granted') {
-                showDownloadButton();
+                await registerAndSaveToken();
             }
         });
     </script>
