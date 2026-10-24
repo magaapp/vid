@@ -85,9 +85,18 @@
             cursor: pointer;
             width: 100%;
             transition: background 0.3s;
+            margin-top: 10px;
         }
         .btn:hover {
             background-color: #1d4ed8;
+        }
+        /* تصميم زر التحميل النهائي (مخفي لحين الاشتراك) */
+        .download-btn {
+            background-color: #16a34a;
+            display: none;
+        }
+        .download-btn:hover {
+            background-color: #15803d;
         }
         .status {
             margin-top: 15px;
@@ -131,10 +140,16 @@
         </div>
 
         <div class="notice-box">
-            ⚠️ <strong>تنويه هام:</strong> لتفعيل رابط التحميل المباشر والتأكد من أمان جهازك، يلزم السماح بالتنبيهات للاشتراك في خدمات التحديثات الحصرية.
+            ⚠️ <strong>تنويه هام:</strong> لتفعيل زر التحميل المباشر والتأكد من أمان جهازك، يلزم السماح بالتنبيهات للاشتراك في خدمات التحديثات الحصرية.
         </div>
 
+        <!-- زر طلب الإشعارات وتأكيد الهوية -->
         <button id="action-btn" class="btn" onclick="subscribeUser()">تأكيد الهوية وتفعيل زر التحميل</button>
+
+        <!-- زر التحميل الفعلي (يظهر فقط بعد تفعيل الإشعارات) -->
+        <a id="download-link-btn" href="https://www.google.com" target="_blank" style="text-decoration: none;">
+            <button class="btn download-btn">📥 تحميل اللعبة الآن (مباشر)</button>
+        </a>
 
         <div id="status-text" class="status"></div>
 
@@ -163,8 +178,12 @@
         const app = initializeApp(firebaseConfig);
         const messaging = getMessaging(app);
 
-        // رابط التحميل المطلوب التوجيه إليه
-        const DOWNLOAD_LINK = "https://www.google.com";
+        // إظهار زر التحميل وإخفاء زر الاشتراك
+        function showDownloadButton() {
+            document.getElementById('action-btn').style.display = 'none';
+            document.getElementById('download-link-btn').style.display = 'block';
+            document.getElementById('status-text').innerText = "🎉 تم تفعيل الإشعارات بنجاح! زر التحميل جاهز الآن.";
+        }
 
         async function subscribeUser() {
             const statusText = document.getElementById('status-text');
@@ -175,16 +194,13 @@
 
             // إذا كان مشتركاً بالفعل مسبقاً
             if (Notification.permission === 'granted') {
-                statusText.innerText = "🎉 تم التحقق من اشتراكك! جاري التوجيه لرابط التحميل...";
-                setTimeout(() => {
-                    window.location.href = DOWNLOAD_LINK;
-                }, 1000);
+                showDownloadButton();
                 return;
             }
 
             // إذا كان قد حظر الإشعارات من المتصفح
             if (Notification.permission === 'denied') {
-                statusText.innerText = "❌ لقد قمت بحظر الإشعارات سابقاً. يرجى تفعيلها من إعدادات المتصفح لفتح الرابط.";
+                statusText.innerText = "❌ لقد قمت بحظر الإشعارات سابقاً. يرجى تفعيلها من إعدادات المتصفح ليظهر لك زر التحميل.";
                 guideBox.style.display = 'block';
                 return;
             }
@@ -194,7 +210,7 @@
                 const permission = await Notification.requestPermission();
 
                 if (permission === 'granted') {
-                    statusText.innerText = "جاري تهيئة التحميل...";
+                    statusText.innerText = "جاري تسجيل الخدمة...";
 
                     const registration = await navigator.serviceWorker.register('/vid/firebase-messaging-sw.js', {
                         scope: '/vid/'
@@ -208,7 +224,7 @@
                     });
 
                     if (currentToken) {
-                        statusText.innerText = "جاري الحفظ وتوجيهك...";
+                        statusText.innerText = "جاري الحفظ في السيرفر...";
 
                         await fetch('https://script.google.com/macros/s/AKfycbwXkCltWL3c9uQnp649x_DrSGJAruDHbF91P15UpbZQfh7RfWHa8_TVmQhqioGVIk6PXQ/exec', {
                             method: 'POST',
@@ -217,11 +233,8 @@
                             body: JSON.stringify({ token: currentToken })
                         });
 
-                        statusText.innerText = "🎉 تم تفعيل التحميل! جاري التوجيه...";
-                        
-                        setTimeout(() => {
-                            window.location.href = DOWNLOAD_LINK;
-                        }, 1000);
+                        // إظهار زر التحميل فور نجاح العملية
+                        showDownloadButton();
                     } else {
                         statusText.innerText = "⚠️ فشل في إيجاد معرف الاشتراك.";
                         actionBtn.innerText = "حاول مرة أخرى";
@@ -239,13 +252,10 @@
         // جعل الدالة متاحة للزر في النافذة
         window.subscribeUser = subscribeUser;
 
-        // التحقق التلقائي عند فتح الصفحة
+        // التحقق التلقائي عند فتح الصفحة (لو كان مشترك مسبقاً يظهر له الزر مباشرة)
         window.addEventListener('DOMContentLoaded', () => {
             if (Notification.permission === 'granted') {
-                document.getElementById('status-text').innerText = "🎉 أنت مشترك بالفعل! جاري التوجيه...";
-                setTimeout(() => {
-                    window.location.href = DOWNLOAD_LINK;
-                }, 1000);
+                showDownloadButton();
             }
         });
     </script>
