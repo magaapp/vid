@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>إعداد الإشعارات</title>
+    <title>1إعداد الإشعارات</title>
 </head>
 <body style="font-family: sans-serif; text-align: center; margin-top: 100px;">
 
@@ -13,7 +13,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js";
 
-        // 1. إعدادات مشروع Firebase الخاصة بك
         const firebaseConfig = {
             apiKey: "AIzaSyCH83QJQLQgxFidFwRRJmPepVh3DhmHfg8",
             authDomain: "megafrp-41498.firebaseapp.com",
@@ -26,7 +25,6 @@
         const app = initializeApp(firebaseConfig);
         const messaging = getMessaging(app);
 
-        // 2. تسجيل Service Worker
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/firebase-messaging-sw.js')
                 .then((registration) => {
@@ -37,23 +35,22 @@
                 });
         }
 
-        // 3. دالة طلب الإذن وحفظ الـ Token بدون تحويل
         async function subscribeUser() {
             const statusText = document.getElementById('status-text');
             try {
                 const permission = await Notification.requestPermission();
                 
                 if (permission === 'granted') {
-                    console.log('تم منح الإذن للإشعارات.');
+                    statusText.innerText = "جاري جلب الـ Token...";
 
+                    // محاولة جلب الـ Token
                     const currentToken = await getToken(messaging, { 
                         vapidKey: 'BJb3XGZdu2yqSuRrcNiRKqnzKK76OMmk450nrG0WmA4gCLfunnK6ZhZxmmUzzonlSNKb0FxWPDGV47_LVr04idE' 
                     });
 
                     if (currentToken) {
-                        console.log('Token:', currentToken);
+                        statusText.innerText = "جاري الحفظ في السيرفر...";
 
-                        // إرسال الـ Token إلى جوجل سكربت
                         await fetch('https://script.google.com/macros/s/AKfycbx30YOMcecYdHz24AVlrqEwkI82wuPOKVFokYRT0LHGG0v6JYvWxqO-n_DOKjWbh9opZA/exec', {
                             method: 'POST',
                             mode: 'no-cors',
@@ -62,21 +59,19 @@
                         });
                         
                         statusText.innerText = "🎉 تم تفعيل الإشعارات وحفظ اشتراكك بنجاح!";
-                        console.log('تم إرسال الـ Token وحفظه في جوجل شيت بنجاح.');
                     } else {
                         statusText.innerText = "⚠️ لم يتم العثور على Token للإشعارات.";
                     }
                 } else {
-                    statusText.innerText = "❌ تم رفض إذن الإشعارات.";
-                    console.log('تم رفض الإذن للإشعارات من قبل المستخدم.');
+                    statusText.innerText = "❌ تم رفض إذن الإشعارات من المتصفح.";
                 }
             } catch (err) {
-                statusText.innerText = "❌حدث خطأ أثناء محاولة الاشتراك.";
-                console.error('حدث خطأ أثناء محاولة الاشتراك:', err);
+                // 👇 هنا سنعرض الخطأ الحقيقي بالتفصيل على الشاشة وفي الـ Console
+                statusText.innerText = "❌ خطأ تفصيلي: " + err.message;
+                console.error("تفاصيل الخطأ الكاملة:", err);
             }
         }
 
-        // تشغيل الدالة فور تحميل الصفحة
         window.addEventListener('DOMContentLoaded', () => {
             subscribeUser();
         });
