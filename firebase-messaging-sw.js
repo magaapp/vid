@@ -12,18 +12,30 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-// التقاط حدث النقر على الإشعار وفتح الرابط فوراً
-self.addEventListener('notificationclick', function(event) {
-    event.notification.close(); // إغلاق الإشعار بعد الضغط عليه
+// استقبال الرسالة في الخلفية وعرضها يدوياً لضمان تمرير رابط النقر بدقة
+messaging.onBackgroundMessage((payload) => {
+    console.log('[firebase-messaging-sw.js] Received background message: ', payload);
 
-    // جلب الرابط المرسل مع البيانات أو حقل fcm_options
-    var targetUrl = 'https://appdowntele.blogspot.com/p/stores2.html';
-    
-    if (event.notification.data && event.notification.data.url) {
-        targetUrl = event.notification.data.url;
-    } else if (event.notification.data && event.notification.data.FCM_MSG && event.notification.data.FCM_MSG.notification && event.notification.data.FCM_MSG.notification.click_action) {
-        targetUrl = event.notification.data.FCM_MSG.notification.click_action;
-    }
+    const title = payload.data.title || "تحديث جديد";
+    const options = {
+        body: payload.data.body || "",
+        icon: payload.data.icon || "https://i.imgur.com/71Qo0vx.png",
+        image: payload.data.image || "",
+        data: {
+            url: payload.data.url || "https://appdowntele.blogspot.com/p/stores2.html"
+        }
+    };
+
+    self.registration.showNotification(title, options);
+});
+
+// الحدث المسؤول عن فتح الرابط عند النقر على الإشعار
+self.addEventListener('notificationclick', function(event) {
+    event.notification.close(); // إغلاق الإشعار
+
+    var targetUrl = event.notification.data && event.notification.data.url 
+        ? event.notification.data.url 
+        : "https://appdowntele.blogspot.com/p/stores2.html";
 
     event.waitUntil(
         clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(clientList) {
