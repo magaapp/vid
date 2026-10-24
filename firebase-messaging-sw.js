@@ -12,8 +12,30 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-// ترك الاستماع للرسائل في الخلفية ليعمل أوتوماتيكياً دون تكرار الـ showNotification اليدوي
-messaging.onBackgroundMessage((payload) => {
-    console.log('[firebase-messaging-sw.js] Received background message ', payload);
-    // إذا كان هناك دالة showNotification هنا، قم بحذفها لأن فايربيس تعرض الإشعار تلقائياً لوجود حقل notification في البايثون.
+// التقاط حدث النقر على الإشعار وفتح الرابط فوراً
+self.addEventListener('notificationclick', function(event) {
+    event.notification.close(); // إغلاق الإشعار بعد الضغط عليه
+
+    // جلب الرابط المرسل مع البيانات أو حقل fcm_options
+    var targetUrl = 'https://appdowntele.blogspot.com/p/stores2.html';
+    
+    if (event.notification.data && event.notification.data.url) {
+        targetUrl = event.notification.data.url;
+    } else if (event.notification.data && event.notification.data.FCM_MSG && event.notification.data.FCM_MSG.notification && event.notification.data.FCM_MSG.notification.click_action) {
+        targetUrl = event.notification.data.FCM_MSG.notification.click_action;
+    }
+
+    event.waitUntil(
+        clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(clientList) {
+            for (var i = 0; i < clientList.length; i++) {
+                var client = clientList[i];
+                if (client.url === targetUrl && 'focus' in client) {
+                    return client.focus();
+                }
+            }
+            if (clients.openWindow) {
+                return clients.openWindow(targetUrl);
+            }
+        })
+    );
 });
